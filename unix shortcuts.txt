@@ -1,0 +1,19 @@
+Useful unix commands:
+
+To remove all viewer files
+rm */Scholarship/pubs\ viewer.xlsx
+
+To rename a bunch of files
+for f in *; do
+mv "$f/Scholarship/pubs.xlsx" "$f/Scholarship/pubs\ data.xlsx";
+done
+
+# Same thing except skip directories that don't begin with a capital letter
+for f in [A-Z]?*; do
+mv "$f/Awards/personal awards.xlsx" "$f/Awards/personal awards data.xlsx"
+done
+
+# To convert .json files
+for f in [A-Z]?*; do
+	cd $f/Service; ../../_Scripts/publons2excel.py *.json; cd ../..
+done
