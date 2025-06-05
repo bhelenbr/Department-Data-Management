@@ -16,9 +16,9 @@ def main(argv):
 	
 	df['Current Program'] = df['Current Program'].apply(lambda x: x[(x.find("-")+1):] if isinstance(x, str) else "MS")
 	table = df.pivot_table(values=['Student Name'], index=['FacultyName'], columns=['Current Program'], aggfunc={'Student Name': 'count'},observed=False,fill_value=0)
-	table = table.reset_index()
-	table.columns=['FacultyName','MS','PhD']
+	table.columns=['MS','PhD']
 	#print(table)
+	
 
 	x = np.arange(table.shape[0])  # the label locations
 	width = 0.25  # the width of the bars
@@ -34,11 +34,14 @@ def main(argv):
 
 	# Add some text for labels, title and custom x-axis tick labels, etc.
 	ax.set_ylabel('Graduate Advisees')
-	ax.set_xticks(x + width, table['FacultyName'])
+	ax.set_xticks(x + width, table.index)
 	ax.legend(loc='upper left', ncols=2)
 	plt.xticks(rotation = 90) # Rotates X-Axis Ticks by 45-degrees
 	plt.savefig('Tables/graduate_advisees.png',bbox_inches='tight',pad_inches=1)
 	plt.close()
+	
+	table.columns=['MS Advisees','PhD Advisees']
+	return(table)
 	
 if __name__ == "__main__":
 	main(sys.argv)

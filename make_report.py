@@ -7,7 +7,15 @@ import pandas as pd
 import platform
 import shutil
 import openpyxl
+import argparse
 
+parser = argparse.ArgumentParser(description='This script creates the annual report and assoicated data')
+parser.add_argument('-y','--years', type=int, help='The number of years of data to use (default is 3)',default='3')
+parser.add_argument('-a','--anonymous', action=argparse.BooleanOptionalAction, help='Anonymize salary & teaching/advising evaluations',default=False)
+
+args = parser.parse_args()
+years = args.years
+Anonymous_Flag = args.anonymous
 
 # Run this script from the Department Data folder to create annual report
 
@@ -50,8 +58,7 @@ import teaching_load_plot
 import advising_plot
 import advisee_counts
 
-years = 3
-Anonymous_Flag = 0
+
 
 try:
 	files = glob.glob('Tables/*')
@@ -59,27 +66,41 @@ try:
 		os.remove(f)
 except:
 	pass
-	
-# Get list of last names
-FacultyNames = os.listdir(faculty_source) # For each faculty member
-LastNames = []
-for i,name in enumerate(FacultyNames):
-	if name[0].isalnum():
-		LastNames.append(name[0:name.find(",")])	
-		
-srs_plot.main(['srs_plot',gathered_source +os.sep +"Proposals & Grants" +os.sep +'proposals & grants.xlsx'])
-UR_plot.main(['UR_plot',gathered_source +os.sep +"Undergraduate Research" +os.sep +'undergraduate research data.xlsx'])
-pubs_plot.main(['pubs_plot',gathered_source +os.sep +"Scholarship"])
-thesis_plot.main(['thesis_plot',gathered_source +os.sep +"Thesis" +os.sep +'thesis data.xlsx'])
-current_grads_plot.main(['current_grad_plot',gathered_source +os.sep +"Thesis" +os.sep +'current student data.xlsx'])
-service_plot.main(['service_plot',gathered_source +os.sep +"Service" +os.sep +'service data.xlsx'])
-reviewing_plot.main(['reviewing_plot',gathered_source +os.sep +"Reviewing" +os.sep +'reviews data.xlsx'])
-prospective_plot.main(['prospective_plot',gathered_source +os.sep +"Prospective Visits" +os.sep +'prospective visits.xlsx'],LastNames)
-teaching_eval_plot.main(['teaching_eval_plot',gathered_source +os.sep +"Teaching" +os.sep +'Teaching Eval Data.xlsx'],LastNames,Anonymous_Flag)
-teaching_load_plot.main(['teaching_load_plot',gathered_source +os.sep +"Teaching" +os.sep +'Teaching Info.xlsx'],LastNames)
-advising_plot.main(['advising_plot',gathered_source +os.sep +"Advising" +os.sep +'Advising Evaluation Data.xlsx'],LastNames,Anonymous_Flag)
-advisee_counts.main(['advisee_counts',gathered_source +os.sep +"Advising" +os.sep +'Advisee Counts.xlsx'],LastNames)
 
+# Get list of last names
+names = os.listdir(faculty_source) # For each faculty member
+FacultyNames = []
+for name in names:
+	if name[0].isalnum():
+		FacultyNames.append(name)	
+
+df = pd.DataFrame();
+
+new_df = srs_plot.main(['srs_plot',gathered_source +os.sep +"Proposals & Grants" +os.sep +'proposals & grants.xlsx'],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = UR_plot.main(['UR_plot',gathered_source +os.sep +"Undergraduate Research" +os.sep +'undergraduate research data.xlsx'],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = pubs_plot.main(['pubs_plot',gathered_source +os.sep +"Scholarship"],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = thesis_plot.main(['thesis_plot',gathered_source +os.sep +"Thesis" +os.sep +'thesis data.xlsx'],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = current_grads_plot.main(['current_grad_plot',gathered_source +os.sep +"Thesis" +os.sep +'current student data.xlsx'])
+df = pd.concat([df, new_df],axis=1)
+new_df = service_plot.main(['service_plot',gathered_source +os.sep +"Service" +os.sep +'service data.xlsx'],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = reviewing_plot.main(['reviewing_plot',gathered_source +os.sep +"Reviewing" +os.sep +'reviews data.xlsx'],years)
+df = pd.concat([df, new_df],axis=1)
+new_df = prospective_plot.main(['prospective_plot',gathered_source +os.sep +"Prospective Visits" +os.sep +'prospective visits.xlsx'],FacultyNames,years)
+df = pd.concat([df, new_df],axis=1)
+new_df = teaching_eval_plot.main(['teaching_eval_plot',gathered_source +os.sep +"Teaching" +os.sep +'Teaching Eval Data.xlsx'],FacultyNames,years,Anonymous_Flag)
+df = pd.concat([df, new_df],axis=1)
+new_df = teaching_load_plot.main(['teaching_load_plot',gathered_source +os.sep +"Teaching" +os.sep +'Teaching Info.xlsx'],FacultyNames,years)
+df = pd.concat([df, new_df],axis=1)
+new_df = advising_plot.main(['advising_plot',gathered_source +os.sep +"Advising" +os.sep +'Advising Evaluation Data.xlsx'],FacultyNames,years,Anonymous_Flag)
+df = pd.concat([df, new_df],axis=1)
+new_df = advisee_counts.main(['advisee_counts',gathered_source +os.sep +"Advising" +os.sep +'Advisee Counts.xlsx'],FacultyNames,years)
+df = pd.concat([df, new_df],axis=1)
+df.to_excel('faculty_data.xlsx')
 
 # open files
 fgrants = open('Tables/grants_far.tex', 'a') # file to write

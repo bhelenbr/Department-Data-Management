@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 from datetime import date
 
-def main(argv):
+def main(argv,years):
 	source = argv[1] # file to read
 	try:
 		df = pd.read_excel(source,header=0)
@@ -16,25 +16,26 @@ def main(argv):
 	
 	today = date.today()
 	year = today.year
-	begin_year = year - 3
+	begin_year = year - years
 
 	df = df[(df['Calendar Year'] >= begin_year)]
 	df.sort_values(by=['Calendar Year','Term'], inplace=True, ascending = [False,True])
 	df = df.reset_index()
 
 	table = df.pivot_table(values=['Students'], index=['FacultyName'], aggfunc={'Students': 'count'},observed=False)
-	table = table.reset_index()
-	table.columns=['FacultyName','Count']
+	table.columns=['URCount']
  
 	# creating the bar plot
 	fig = plt.figure(figsize = (10, 5))
-	plt.bar(table['FacultyName'], table['Count'], color ='blue',
+	plt.bar(table.index, table['URCount'], color ='blue',
 			width = 0.4)
 	plt.xticks(rotation = 90) # Rotates X-Axis Ticks by 45-degrees
 	plt.xlabel("Faculty")
 	plt.ylabel("Undergraduate Projects Advised")
 	plt.savefig('Tables/UR.png',bbox_inches='tight',pad_inches=1)
 	plt.close()
+	
+	return(table)
 
 if __name__ == "__main__":
-	main(sys.argv)
+	main(sys.argv,3)

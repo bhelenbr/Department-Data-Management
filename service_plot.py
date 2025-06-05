@@ -6,7 +6,7 @@ import pandas as pd
 import sys
 from datetime import date
 
-def main(argv):
+def main(argv,years):
 	source = argv[1] # file to read
 	try:
 		df = pd.read_excel(source,header=0)
@@ -16,25 +16,22 @@ def main(argv):
 	
 	today = date.today()
 	year = today.year
-	begin_year = year - 3
+	begin_year = year - years
 
 	df = df[(df['Calendar Year'] >= begin_year)]
 	df = df.reset_index()
 	
 	professional = df[(df['Type'] == 'Professional')]
-	professional.reset_index()
 	community = df[(df['Type'] == 'Community')]
-	community.reset_index()
 	university = df[(df['Type'] == 'University') | (df['Type'] == 'Department')]
-	university.reset_index()
 	
 	table = professional.pivot_table(values=['Hours/Semester'], index=['FacultyName'], aggfunc={'Hours/Semester': 'sum'},observed=False)
-	table = table.reset_index()
-	table.columns=['FacultyName','Hours']
+	table.columns=['Prof. Service']
+	new_df = table
  
 	# creating the bar plot
 	fig = plt.figure(figsize = (10, 5))
-	plt.bar(table['FacultyName'], table['Hours'], color ='blue',
+	plt.bar(table.index, table['Prof. Service'], color ='blue',
 			width = 0.4)
 	plt.xticks(rotation = 90) # Rotates X-Axis Ticks by 45-degrees
 	plt.xlabel("Faculty")
@@ -44,12 +41,12 @@ def main(argv):
 	plt.close()
 	
 	table = community.pivot_table(values=['Hours/Semester'], index=['FacultyName'], aggfunc={'Hours/Semester': 'sum'},observed=False)
-	table = table.reset_index()
-	table.columns=['FacultyName','Hours']
- 
+	table.columns=['Comm. Service']
+	new_df = pd.concat([new_df, table],axis=1)
+
 	# creating the bar plot
 	fig = plt.figure(figsize = (10, 5))
-	plt.bar(table['FacultyName'], table['Hours'], color ='blue',
+	plt.bar(table.index, table['Comm. Service'], color ='blue',
 			width = 0.4)
 	plt.xticks(rotation = 90) # Rotates X-Axis Ticks by 45-degrees
 	plt.xlabel("Faculty")
@@ -58,12 +55,12 @@ def main(argv):
 	plt.close()
 	
 	table = university.pivot_table(values=['Hours/Semester'], index=['FacultyName'], aggfunc={'Hours/Semester': 'sum'},observed=False)
-	table = table.reset_index()
-	table.columns=['FacultyName','Hours']
- 
+	table.columns=['U. Service']
+	new_df = pd.concat([new_df, table],axis=1)
+
 	# creating the bar plot
 	fig = plt.figure(figsize = (10, 5))
-	plt.bar(table['FacultyName'], table['Hours'], color ='blue',
+	plt.bar(table.index, table['U. Service'], color ='blue',
 			width = 0.4)
 	plt.xticks(rotation = 90) # Rotates X-Axis Ticks by 45-degrees
 	plt.xlabel("Faculty")
@@ -72,5 +69,7 @@ def main(argv):
 	plt.savefig('Tables/university_service.png',bbox_inches='tight',pad_inches=1)
 	plt.close()
 	
+	return(new_df)
+	
 if __name__ == "__main__":
-	main(sys.argv)
+	main(sys.argv,3)
