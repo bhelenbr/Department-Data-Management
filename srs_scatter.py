@@ -47,12 +47,7 @@ source_folder = sys.argv[1]
 file_name = "proposals & grants.xlsx"
 # Read the desired source file, which is the updated Proposal and Grants file with new entries
 
-
-# Destination is faculty folder
-if platform.system() == 'Windows':
-    faculty_folder = r"S:\departments\Mechanical & Aerospace Engineering\Faculty"
-else:
-    faculty_folder = r"/Volumes/Mechanical & Aerospace Engineering/Faculty"
+faculty_folder = sys.argv[2]
 
 subfolder = "Proposals & Grants"
 

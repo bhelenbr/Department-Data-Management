@@ -9,22 +9,16 @@ import pandas as pd
 import re
 import xlrd
 
-
-if platform.system() == 'Windows':
-	sys.path.insert(0, r"S:\departments\Mechanical & Aeronautical Engineering\Faculty\_Scripts")
-	facultyFolder = r"S:\departments\Mechanical & Aerospace Engineering\Faculty"
-
-else:
-	sys.path.insert(0, r"/Volumes/Mechanical & Aerospace Engineering/Faculty/_Scripts")
-	facultyFolder = r"/Volumes/Mechanical & Aerospace Engineering/Faculty"
-
 from make_cv.stringprotect import abbreviate_name_list
 
 source = sys.argv[1]
+facultyFolder = sys.argv[2]
+
 df = pd.read_excel(source,skiprows=1)
 classnum = df["Class"].apply(lambda x: int(x[-3:]))
 df = df[classnum < 499]
 df = df[df['Title'] != 'Aircraft Design I']
+df = df[df['Title'] != 'Professional Experience']
 df['Calendar Year'] = df['Term'].apply(lambda x: int(x[-4:]))
 df['Term'] = df['Term'].apply(lambda x: x[:-5])
 df['Program Type'] = df['Program Type'].apply(lambda x: re.sub("Independent Study","Ind. Proj.",re.sub("Research","Und. Res.",x)))

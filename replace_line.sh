@@ -36,7 +36,7 @@ echo $search_string
 echo $line_to_replace
 
 # Replace the line in target_file
-sed -i '' "s/^$search_string.*/$line_to_replace/" "$target_file"
+sed -i '' "s:^$search_string.*:$line_to_replace:" "$target_file"
 
 # Confirm the replacement
 echo "Line starting with '$search_string' in '$target_file' has been replaced."

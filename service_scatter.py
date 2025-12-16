@@ -1,51 +1,89 @@
 #! /usr/bin/env python3
 
-import os,sys,platform,shutil
+import os
+import sys
+import shutil
 import pandas as pd
 import argparse
+from pathlib import Path
+from make_cv.stringprotect import abbreviate_name
 
-# Python code to scatter Undergraduate research data to faculty folders
-# First argument is file to scatter, second argument is Faculty
-# scatter <file to scatter> <Faculty folder>
-parser = argparse.ArgumentParser(description='This script scatters the department committee data to the faculty service files')
-parser.add_argument('file', help='the name of the file to scatter')
-parser.add_argument('-y', '--year',type=int,help='the calendar year of data to be scattered')
+# ---------------- CLI ----------------
+parser = argparse.ArgumentParser(
+	description='Scatter department committee data to faculty service files'
+)
+parser.add_argument('file', help='Excel file to scatter')
+parser.add_argument('destination', help='Faculty directory')
+parser.add_argument('-y', '--year', type=int, required=True,
+					help='Calendar year of data to scatter')
+
 args = parser.parse_args()
 
-
-# Destination is faculty folder
-if platform.system() == 'Windows':
-	facultyFolder = r"S:\departments\Mechanical & Aerospace Engineering\Faculty"
-else:
-	facultyFolder = r"/Volumes/Mechanical & Aerospace Engineering/Faculty"
-
+facultyFolder = args.destination
 source = args.file
-committees = pd.read_excel(source,sheet_name='Data')
-committees = committees[committees["Calendar Year"] == args.year]
+year = args.year
 
-destination = "Service" +os.sep +"service data.xlsx"
+# ---------------- Load data ----------------
+committees = pd.read_excel(source)
 
-os.chdir(facultyFolder) # changes directory to Faculty folder
+committees = committees[committees["Calendar Year"] == year]
+
+committees["Faculty"] = (
+	committees["Faculty"]
+	.astype(str)
+	.apply(lambda x: abbreviate_name(x).lower())
+)
+
+committees.fillna(value={"Comments": ""}, inplace=True)
+
+# ---------------- Scatter ----------------
+os.chdir(facultyFolder)
 
 for FacultyName in os.listdir("."):
-	if FacultyName.find(",") > -1:
-		print(FacultyName)
-		lastname = FacultyName[0:FacultyName.find(",")]
-		
-		# Get entries for this faculty
-		entries=committees[committees["Faculty"]==lastname]
-		toAppend = entries.iloc[:,1:7]
-		
-		filename = FacultyName +os.sep +destination
-		excelFile = pd.read_excel(filename,sheet_name=None)
-		
-		result = pd.concat([excelFile["Data"], toAppend],ignore_index=True)
-		result = result.drop_duplicates()
-		result.sort_values(by=['Calendar Year','Term','Description'],ascending=[True,False,True],inplace=True)
-		
-		backupfile = FacultyName +os.sep +"Service" +os.sep +"service_backup.xlsx"
-		shutil.copyfile(filename,backupfile)
-		
-		with pd.ExcelWriter(filename) as writer:
-			excelFile["Notes"].to_excel(writer,sheet_name='Notes',index=False)
-			result.to_excel(writer,sheet_name='Data',index=False)
+	if "," not in FacultyName:
+		continue
+
+	lastname = FacultyName.lower().split(",")[0].strip()
+	firstinitial = FacultyName.lower().split(",")[1].strip()[0]
+
+	faculty_key = f"{firstinitial}. {lastname}"
+
+	entries = committees[committees["Faculty"] == faculty_key]
+	if entries.empty:
+		continue
+	print(f"updating {faculty_key}")
+	toAppend = entries.drop(columns=["Faculty", "Department"], errors="ignore")
+	
+	service_dir = Path(FacultyName) / "Service"
+	service_dir.mkdir(parents=True, exist_ok=True)
+	
+	filename = service_dir / "service data.xlsx"
+	backupfile = service_dir / "service_backup.xlsx"
+	
+	# ---------------- Read existing file ----------------
+	if filename.exists():
+		shutil.copyfile(filename, backupfile)
+		excelFile = pd.read_excel(filename, sheet_name=None)
+		existing_data = excelFile.get("Data", pd.DataFrame())
+		existing_data.fillna(value={"Comments": ""}, inplace=True)
+		notes = excelFile.get("Notes", pd.DataFrame())
+	else:
+		existing_data = pd.DataFrame()
+		notes = pd.DataFrame()
+	
+	# ---------------- Merge ----------------
+	result = (
+		pd.concat([existing_data, toAppend], ignore_index=True)
+		.drop_duplicates()
+		.sort_values(
+			by=["Calendar Year", "Term", "Description"],
+			ascending=[True, False, True]
+		)
+	)
+	
+	# ---------------- Write ----------------
+	with pd.ExcelWriter(filename, engine="openpyxl", mode="w") as writer:
+		notes.to_excel(writer, sheet_name="Notes", index=False)
+		result.to_excel(writer, sheet_name="Data", index=False)
+
+

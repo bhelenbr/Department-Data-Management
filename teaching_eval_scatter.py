@@ -7,20 +7,21 @@
 import pandas as pd
 import os
 import platform
+import sys
 
-# Destination is faculty folder
-if platform.system() == 'Windows':
-	file_destination = r"S:\departments\Mechanical & Aerospace Engineering\Faculty"
-	os.chdir(r"S:\departments\Mechanical & Aerospace Engineering\Confidential Information\Department Data\Teaching")
-else:
-	file_destination = r"/Volumes/Mechanical & Aerospace Engineering/Faculty"
-	os.chdir(r"/Volumes/Mechanical & Aerospace Engineering/Confidential Information/Department Data/Teaching")
-	
-df = pd.read_excel('Teaching Eval Data.xlsx',"Data")
+faculty_dir = sys.argv[2]
+source_file = sys.argv[1]
+
+df = pd.read_excel(source_file)
+new_columns = [ "STRM","term","school","course","course_num","course_section","course_title","INSTR_NA","count_evals","enrollment","Particip","question","a1","a1_pct","a2","a2_pct","a3","a3_pct","a4","a4_pct","a5","a5_pct","na","na_pct","Calculated Mean","Question"]
+df.columns = new_columns
+df["Weighted Average"] = df["count_evals"]*df["Calculated Mean"]
+df["combined_course_num"] = df["course_num"]
 df.fillna(value={"INSTR_NA":""},inplace=True)
 sorted = df.sort_values(by="INSTR_NA",ignore_index=True)
 nrows = sorted.shape[0]
-os.chdir(file_destination) # where files need to go
+
+os.chdir(faculty_dir) # where files need to go
 
 count = 1
 while count < nrows:
