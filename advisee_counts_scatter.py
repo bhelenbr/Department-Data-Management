@@ -10,7 +10,7 @@ from make_cv.stringprotect import abbreviate_name_list
 
 source = sys.argv[1]
 facultyFolder = sys.argv[2]
-df = pd.read_excel(source,skiprows=0)
+df = pd.read_excel(source,skiprows=1)
 df.fillna(value={"Advisor Name":""},inplace=True)
 print(df.columns)
 destination = "Service" +os.sep +"advisee counts.xlsx"

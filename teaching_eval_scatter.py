@@ -12,11 +12,11 @@ import sys
 faculty_dir = sys.argv[2]
 source_file = sys.argv[1]
 
-df = pd.read_excel(source_file)
-new_columns = [ "STRM","term","school","course","course_num","course_section","course_title","INSTR_NA","count_evals","enrollment","Particip","question","a1","a1_pct","a2","a2_pct","a3","a3_pct","a4","a4_pct","a5","a5_pct","na","na_pct","Calculated Mean","Question"]
+df = pd.read_excel(source_file,skiprows=1)
+new_columns = [ "STRM","term","school","course","course_num","course_section","course_title","INSTR_NA","count_evals","enrollment","Particip","question","a1","a1_pct","a2","a2_pct","a3","a3_pct","a4","a4_pct","a5","a5_pct","na","na_pct","Calculated Mean","Question","combined_course_num"]
 df.columns = new_columns
 df["Weighted Average"] = df["count_evals"]*df["Calculated Mean"]
-df["combined_course_num"] = df["course_num"]
+df["combined_course_num"] = df["combined_course_num"].fillna(df["course_num"])
 df.fillna(value={"INSTR_NA":""},inplace=True)
 sorted = df.sort_values(by="INSTR_NA",ignore_index=True)
 nrows = sorted.shape[0]
