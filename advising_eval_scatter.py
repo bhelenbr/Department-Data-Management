@@ -13,7 +13,7 @@ from pathlib import Path
 faculty_dir = sys.argv[2]
 source_file = sys.argv[1]
 
-df = pd.read_excel(source_file)
+df = pd.read_excel(source_file,skiprows=1)
 df.fillna(value={"LN,FN":""},inplace=True)
 sorted = df.sort_values(by="LN,FN",ignore_index=True)
 nrows = sorted.shape[0]
@@ -34,7 +34,7 @@ while count < nrows:
 
 				if Path(filename).is_file():
 					excelFile = pd.read_excel(filename)
-					result = pd.concat([excelFile, toAppend],ignore_index=True)
+					result = pd.concat([excelFile, entries],ignore_index=True)
 					result = result.drop_duplicates()
 					result.sort_values(by=['Term'],ascending=[True],inplace=True)					
 					with pd.ExcelWriter(filename) as writer:
