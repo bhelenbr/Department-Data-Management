@@ -18,7 +18,7 @@ destination = "Service" +os.sep +"advisee counts.xlsx"
 
 today = date.today()
 year = today.year
-df["Year"] = year
+df["YEAR"] = year
 
 os.chdir(facultyFolder) # changes directory to Faculty folder
 
