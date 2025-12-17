@@ -5,6 +5,7 @@ import pandas as pd
 import re
 import xlrd
 from pathlib import Path
+from datetime import date
 
 from make_cv.stringprotect import abbreviate_name_list
 
@@ -14,6 +15,10 @@ df = pd.read_excel(source,skiprows=1)
 df.fillna(value={"Advisor Name":""},inplace=True)
 print(df.columns)
 destination = "Service" +os.sep +"advisee counts.xlsx"
+
+today = date.today()
+year = today.year
+df["Year"] = year
 
 os.chdir(facultyFolder) # changes directory to Faculty folder
 
