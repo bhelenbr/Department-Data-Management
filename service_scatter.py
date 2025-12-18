@@ -31,7 +31,7 @@ committees = committees[committees["Calendar Year"] == year]
 committees["Faculty"] = (
 	committees["Faculty"]
 	.astype(str)
-	.apply(lambda x: abbreviate_name(x).lower())
+	.apply(lambda x: abbreviate_name(x,first_initial_only=True).lower())
 )
 
 committees.fillna(value={"Comments": ""}, inplace=True)
@@ -43,10 +43,7 @@ for FacultyName in os.listdir("."):
 	if "," not in FacultyName:
 		continue
 
-	lastname = FacultyName.lower().split(",")[0].strip()
-	firstinitial = FacultyName.lower().split(",")[1].strip()[0]
-
-	faculty_key = f"{firstinitial}. {lastname}"
+	faculty_key = abbreviate_name(FacultyName,first_initial_only=True)
 
 	entries = committees[committees["Faculty"] == faculty_key]
 	if entries.empty:

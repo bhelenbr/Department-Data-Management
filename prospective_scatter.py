@@ -29,7 +29,7 @@ df.fillna(value={"Staff": "", "Deposit": ""}, inplace=True)
 df["Deposit"] = (df["Deposit"] == "Deposit").astype(int)
 
 df["Staff"] = df["Staff"].apply(
-	lambda x: abbreviate_name(x.split("-")[0].strip()) if "-" in x else abbreviate_name(x)
+	lambda x: abbreviate_name(x.split("-")[0].strip()) if "-" in x else abbreviate_name(x,first_initial_only=True)
 )
 
 df["Year"] = df["Date of Visit"].astype(str).str[:4].astype(int)
@@ -53,9 +53,8 @@ for advisor, entries in table.groupby("Staff"):
 		if not FacultyName[0].isalnum():
 			continue
 
-		lastname = FacultyName.lower().split(",")[0]
-		firstinitial = FacultyName.lower().split(",")[1].strip()[0]
-		if advisor.lower().find(f"{firstinitial}. {lastname}") == -1:
+		
+		if advisor.lower().find(abbreviate_name(FacultyName,first_initial_only=True)) == -1:
 			continue
 		
 		filename = (
