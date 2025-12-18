@@ -13,7 +13,6 @@ from os.path import exists
 from make_cv.stringprotect import abbreviate_name
 
 new_column_names = {   
-'Proposal': 'Proposal_ID',
 'P_STATUS': 'Role',
 'Name': 'Faculty', 
 'Name.1': 'Sponsor',
@@ -33,9 +32,8 @@ def merge_proposals(df_new, destination):
 		new_rows = df_new.loc[~df_new.index.isin(df_old.index)]
 		print(f"adding {len(new_rows)} rows")
 		# insert new rows by index
-		df_old.loc[new_rows.index, new_rows.columns] = new_rows
-
-		df_old.index.name = "Proposal_ID"
+		df_old = df_old.reindex(df_old.index.union(new_rows.index))
+		df_old.update(new_rows)
 
 		with pd.ExcelWriter(destination) as writer:
 			df_old.to_excel(writer, sheet_name="Data")
@@ -55,7 +53,7 @@ df["Faculty"] = (
 	.astype(str)
 	.apply(lambda x: abbreviate_name(x,first_initial_only=True).lower())
 )
-df.indexname = "Proposal_ID"
+df.index.name = "Proposal_ID"
 
 faculty_folder = sys.argv[2]
 subfolder = "Proposals & Grants"
