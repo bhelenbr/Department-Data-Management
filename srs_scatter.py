@@ -21,21 +21,28 @@ new_column_names = {
 'Long Descr': 'Title'
 }
 
-def merge_proposals(df_new,destination):
+def merge_proposals(df_new, destination):
 	if exists(destination):
-		df_old = pd.read_excel(destination,index_col='Proposal_ID',sheet_name='Data')
+		df_old = pd.read_excel(
+			destination,
+			index_col="Proposal_ID",
+			sheet_name="Data"
+		)
+
+		# keep only truly new proposal IDs
 		new_rows = df_new.loc[~df_new.index.isin(df_old.index)]
-		print(new_rows)
-		df_concat = pd.concat([df_old, new_rows])
-		#df_addPIs = pd.merge(df_concat, df_new['Principal Investigators'], left_index=True,right_index=True, how='left',suffixes=('_old',None))
-		#df_addPIs.drop(columns=['Principal Investigators_old'],inplace=True)
+		print(f"adding {len(new_rows)} rows")
+		# insert new rows by index
+		df_old.loc[new_rows.index, new_rows.columns] = new_rows
+
+		df_old.index.name = "Proposal_ID"
+
 		with pd.ExcelWriter(destination) as writer:
-			#df_addPIs.to_excel(writer,sheet_name='sheet1')
-			df_concat.to_excel(writer,sheet_name='Data')
+			df_old.to_excel(writer, sheet_name="Data")
+
 	else:
 		with pd.ExcelWriter(destination) as writer:
-			df_new.to_excel(writer,sheet_name='Data')
-	return
+			df_new.to_excel(writer, sheet_name="Data")
 
 
 # Read the desired source file, which is the updated Proposal and Grants file with new entries
@@ -46,8 +53,9 @@ df.drop(['Project','ID','PCT','RO Number'], axis=1,inplace=True)
 df["Faculty"] = (
 	df["Faculty"]
 	.astype(str)
-	.apply(lambda x: abbreviate_name(x).lower())
+	.apply(lambda x: abbreviate_name(x,first_initial_only=True).lower())
 )
+df.indexname = "Proposal_ID"
 
 faculty_folder = sys.argv[2]
 subfolder = "Proposals & Grants"
@@ -56,7 +64,7 @@ file_name = "proposals & grants.xlsx"
 for FacultyName in os.listdir(faculty_folder):
 	pandg_folder = faculty_folder+os.sep +FacultyName +os.sep +subfolder
 	if os.path.isdir(pandg_folder):
-		name = abbreviate_name(FacultyName).lower();
-		print(name)
+		name = abbreviate_name(FacultyName,first_initial_only=True).lower();
 		entries=df[df["Faculty"]==name]
+		print(f"{name}: {str(len(entries))}")
 		merge_proposals(entries,faculty_folder+os.sep +FacultyName +os.sep +subfolder +os.sep +file_name)
