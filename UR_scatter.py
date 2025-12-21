@@ -9,6 +9,7 @@ import pandas as pd
 import re
 import xlrd
 
+from make_cv.stringprotect import abbreviate_name
 from make_cv.stringprotect import abbreviate_name_list
 
 source = sys.argv[1]
@@ -24,7 +25,11 @@ df['Term'] = df['Term'].apply(lambda x: x[:-5])
 df['Program Type'] = df['Program Type'].apply(lambda x: re.sub("Independent Study","Ind. Proj.",re.sub("Research","Und. Res.",x)))
 df = df.rename(columns={"Student Name": "Students"})
 df['Students'] = df['Students'].apply(lambda x: abbreviate_name_list(x))
-
+df["Advisor"] = (
+	df["Advisor"]
+	.astype(str)
+	.apply(lambda x: abbreviate_name(x,first_initial_only=True).lower())
+)
 destination = "Service" +os.sep +"undergraduate research data.xlsx"
 
 os.chdir(facultyFolder) # changes directory to Faculty folder
@@ -32,10 +37,10 @@ os.chdir(facultyFolder) # changes directory to Faculty folder
 for FacultyName in os.listdir("."):
 	if FacultyName.find(",") > -1:
 		print(FacultyName)
-		lastname = FacultyName[0:FacultyName.find(",")]
+		name = abbreviate_name(FacultyName,first_initial_only=True).lower()
 		
 		# Get entries for this faculty
-		entries=df[df["Advisor"].apply(lambda x: x.find(lastname) > -1)]
+		entries=df[df["Advisor"]==name]
 		if entries.shape[0] > 0:
 			toAppend = entries[['Students','Title','Program Type','Term','Calendar Year']]
 			print(toAppend)
