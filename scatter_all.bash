@@ -85,9 +85,9 @@ else
     echo "Warning: McNair file not found in $1, skipping UR_mcnair_scatter.py"
 fi
 
-if ls "$1"/Personal\ Visit\ Information.xlsx 1> /dev/null 2>&1; then
+if ls "$1"/Personal\ Visit\ Information*.xlsx 1> /dev/null 2>&1; then
     echo "Processing Personal Visit Information.xlsx file for prospective_scatter.py"
-    prospective_scatter.py "$1"/Personal\ Visit\ Information.xlsx "$2"
+    prospective_scatter.py "$1"/Personal\ Visit\ Information*.xlsx "$2"
 else
     echo "Warning: Personal Visit Information.xlsx file not found in $1, skipping prospective_scatter.py"
 fi

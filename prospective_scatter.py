@@ -10,19 +10,17 @@ import platform
 import sys
 from pathlib import Path
 import openpyxl
+import re
 
 from make_cv.stringprotect import abbreviate_name
 from make_cv.copy_with_timestamp import copy_with_timestamp
 from merge_df import merge_and_dedup
 
-import sys
-import os
-from pathlib import Path
-import pandas as pd
-
 facultyFolder = sys.argv[2]
 source = sys.argv[1]
 backup_dir = "make_cv/Backups"
+emplid_file = Path("make_cv") / "PersonalData" / "personal_data.txt"
+
 
 # --- Load data ---
 df = pd.read_excel(source)
@@ -54,9 +52,19 @@ for faculty_dir in faculty_path.iterdir():
 		continue
 	FacultyName = faculty_dir.name
 	if FacultyName.find(",") > -1:
+		personal_file = faculty_dir / emplid_file
+		if not personal_file.is_file():
+			print(f"Skipping {FacultyName} (missing personal_data.txt)")
+			continue
+		try:
+			personal_file_text = personal_file.read_text() 
+			employee_id = int(re.search(r'employeeid[ \t]*=[ \t]*(\d+)', personal_file_text, re.IGNORECASE).group(1))
+		except Exception:
+			print(' (invalid employee_id)')
+			continue
+
 		print(f'Adding prospective visit data for {FacultyName}: ', end="")
-		faculty_key = abbreviate_name(FacultyName, first_initial_only=True).lower()
-		entries = table[table['Staff'] == faculty_key]
+		entries = table[table['Staff ID'].astype(int) == employee_id]
 		if entries.shape[0] > 0:
 
 			filename = faculty_dir / "Service" / "prospective visit data.xlsx"
@@ -74,4 +82,3 @@ for faculty_dir in faculty_path.iterdir():
 				result.to_excel(writer, index=False)
 		else:
 			print('No entries')
-	

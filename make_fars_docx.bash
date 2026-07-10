@@ -18,6 +18,6 @@ for file in "$@"; do
     test_far.py -p "${args[@]}"
     cd - >/dev/null || exit 1
   else
-    echo "Skipping missing directory: $file/make_cv/CV" >&2
+    echo "Skipping missing directory: $file/make_cv/FAR_docx" >&2
   fi
 done

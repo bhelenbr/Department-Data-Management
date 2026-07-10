@@ -67,6 +67,10 @@ for faculty_dir in faculty_path.iterdir():
 			if Path(filename).is_file():
 				backup_path = faculty_dir / backup_dir
 				copy_with_timestamp(filename, str(backup_path))
+				existing_data = pd.read_excel(filename, sheet_name="Data")
+				if 'Title' in existing_data.columns:
+					join_cols = ['Student Name', 'Current Program', 'Start Date']
+					entries = entries.merge(existing_data, on=join_cols, how='left', sort=False)
 			with pd.ExcelWriter(filename,date_format='YYYY-MM-DD', datetime_format='YY-MM-DD') as writer:
 				entries.to_excel(writer,sheet_name='Data',index=False)
 			print(f'{entries.shape[0]} entries')
