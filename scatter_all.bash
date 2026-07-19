@@ -57,16 +57,16 @@ else
     echo "Warning: CU_FAR_EXPENDITURES file not found in $1, skipping expenditures_scatter.py"
 fi
 
-if ls "$1"/CU_FAR_PROPS_* 1> /dev/null 2>&1; then
+if ls "$1"/CU_FAR_PROPS*.xlsx 1> /dev/null 2>&1; then
     echo "Processing CU_FAR_PROPS file for proposals_scatter.py"
-    proposals_scatter.py "$1"/CU_FAR_PROPS_* "$2"
+    proposals_scatter.py "$1"/CU_FAR_PROPS*.xlsx "$2"
 else
     echo "Warning: CU_FAR_PROPS file not found in $1, skipping proposals_scatter.py"
 fi
 
-if ls "$1"/CU_FAR_AWARDS_* 1> /dev/null 2>&1; then
+if ls "$1"/CU_FAR_AWARDS*.xlsx 1> /dev/null 2>&1; then
     echo "Processing CU_FAR_AWARDS file for grants_scatter.py"
-    grants_scatter.py "$1"/CU_FAR_AWARDS_* "$2"
+    grants_scatter.py "$1"/CU_FAR_AWARDS*.xlsx "$2"
 else
     echo "Warning: CU_FAR_AWARDS file not found in $1, skipping grants_scatter.py"
 fi
@@ -99,7 +99,7 @@ else
     echo "Warning: Service Master file not found in $1, skipping service_scatter.py"
 fi
 
-if ls "$1"/ETDAdmin* 1> /dev/null 2>&1; then
+if ls "$1"/ETDAdmin*.xlsx 1> /dev/null 2>&1; then
     echo "Processing ETDAdmin file for thesis_scatter.py"
     thesis_scatter.py "$1"/ETDAdmin* "$2"
 else

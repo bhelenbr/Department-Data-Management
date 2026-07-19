@@ -33,7 +33,7 @@ df["Year"] = df["Date of Visit"].astype(str).str[:4].astype(int)
 
 # --- Aggregate ---
 table = (
-	df.groupby(["Staff", "Year"])
+	df.groupby(["Staff ID", "Year"])
 	  .agg(
 		  Visits=("Person Last", "count"),
 		  Deposits=("Deposit", "sum")
