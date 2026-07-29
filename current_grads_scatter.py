@@ -26,7 +26,7 @@ backup_dir = Path("make_cv") / "Backups"
 df = pd.read_excel(source,skiprows=1,dtype={'ID': str}, engine="xlrd")
 df = df[df["Career"]=="GRAD"]
 
-df.drop(columns=['ID','Email','Career','Advisor','Email.1'], axis=1, inplace=True)
+df.drop(columns=['ID','Email','Career','Advisor','Email.1'], inplace=True)
 df = df.fillna("")
 destination = "Scholarship" +os.sep +"current student data.xlsx"
 faculty_path = Path(file_destination)

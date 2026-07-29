@@ -34,7 +34,7 @@ df["course_num"] = df['Subject'].str.strip() + df['Catalog'].str.strip()
 df["num_sec"] = df['course_num'] + "-" + df['Section']
 for col in ['Course and Session Description','Subject','Catalog','A1 count','A2 count','A3 count','A4 count','A5 count','NA count','Comb Sects ID','School','Participant']:
 	if col in df.columns:
-		df.drop(columns=[col], axis=1, inplace=True)
+		df.drop(columns=[col], inplace=True)
 new_column_names = {"Term": "STRM", "Term Description": "term", "Section": "course_section", "Component": "component", "Instruct Mode": "mode", "Class Description": "course_title", "Instructor ID": "ID", "Instructor Name": "INSTR_NA", "Count Evals":"count", "Enrollment Total": "enrollment", "Instructor Role": "role", "Question Number":"question", "Q Mean": "mean", "Question": "question_text", "Combined Sections Descr": "combined_num_sec"}
 
 try:
