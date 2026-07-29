@@ -106,3 +106,11 @@ else
     echo "Warning: ETDAdmin file not found in $1, skipping thesis_scatter.py"
 fi
 
+# Archive Excel files into a dated folder
+archive_dir="$1/$(date +%y_%m_%d)"
+mkdir -p "$archive_dir"
+find "$1" -maxdepth 1 -type f \( -iname '*.xlsx' -o -iname '*.xls' -o -iname '*.xlsm' \) -exec mv {} "$archive_dir"/ \;
+
+echo "Moved Excel files to $archive_dir"
+
+
